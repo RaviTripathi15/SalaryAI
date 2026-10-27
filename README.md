@@ -1,1 +1,1 @@
-# SalaryAI
+# SalaryA
