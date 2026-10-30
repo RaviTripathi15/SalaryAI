@@ -36,4 +36,15 @@ public class PlatformAdmin {
         this.passwordHash = passwordHash;
         this.createdAt = LocalDateTime.now();
     }
+    public Long getId() {
+    return id;
+}
+
+public String getEmail() {
+    return email;
+}
+
+public String getPasswordHash() {
+    return passwordHash;
+}
 }

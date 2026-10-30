@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PlatformAdminService {
 
+    private static final long SETUP_LOCK_KEY = 738291L;
+
     private final PlatformAdminRepository platformAdminRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -33,6 +35,8 @@ public class PlatformAdminService {
     public PlatformAdmin createInitialAdmin(
             String email,
             String rawPassword) {
+
+        platformAdminRepository.acquireSetupLock(SETUP_LOCK_KEY);
 
         if (adminAlreadyExists()) {
             throw new IllegalStateException(
