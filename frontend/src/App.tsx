@@ -1,5 +1,6 @@
 
 import { useState } from 'react'
+import PlatformAdminLogin from './pages/PlatformAdminLogin'
 import { Link, Route, Routes } from 'react-router-dom'
 import RegisterPage from './pages/RegisterPage'
 import './App.css'
@@ -262,6 +263,13 @@ function LoginPage() {
             </span>
           </Link>
 
+          <div className="admin-login-link">
+  <span>Are you a platform administrator?</span>
+  <Link to="/platform-admin/login">
+    Administrator sign in
+  </Link>
+</div>
+
           <p className="security-note">
             <span aria-hidden="true">✓</span>
             Your data is protected by access controls.
@@ -284,6 +292,10 @@ function App() {
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route
+        path="/platform-admin/login"
+        element={<PlatformAdminLogin />}
+      />
     </Routes>
   )
 }
