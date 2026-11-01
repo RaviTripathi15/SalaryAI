@@ -45,4 +45,28 @@ public class OrganizationService {
 
         return organizationRepository.save(organization);
     }
+
+    @Transactional(readOnly = true)
+public java.util.List<Organization> getPendingOrganizations() {
+    return organizationRepository.findByStatus("PENDING");
+}
+
+@Transactional
+public Organization updateOrganizationStatus(Long id, String status) {
+    Organization organization = organizationRepository.findById(id)
+            .orElseThrow(() ->
+                    new IllegalArgumentException("Organization not found."));
+
+    if (!organization.getStatus().equals("PENDING")) {
+        throw new IllegalStateException(
+                "Only pending organizations can be reviewed.");
+    }
+
+    if (!status.equals("APPROVED") && !status.equals("REJECTED")) {
+        throw new IllegalArgumentException("Invalid organization status.");
+    }
+
+    organization.setStatus(status);
+    return organizationRepository.save(organization);
+}
 }

@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "organizations")
 public class Organization {
-
+    
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -51,6 +52,14 @@ public Organization(
     this.passwordHash = passwordHash;
     this.status = "PENDING";
     this.createdAt = LocalDateTime.now();
+}
+
+public String getStatus() {
+    return status;
+}
+
+public void setStatus(String status) {
+    this.status = status;
 }
 
 }
