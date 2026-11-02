@@ -62,4 +62,24 @@ public void setStatus(String status) {
     this.status = status;
 }
 
+
+public Long getId() {
+    return id;
+}
+
+public String getName() {
+    return name;
+}
+
+public String getEmail() {
+    return email;
+}
+
+public String getPhone() {
+    return phone;
+}
+
+public LocalDateTime getCreatedAt() {
+    return createdAt;
+}
 }

@@ -1,5 +1,8 @@
 
 package com.salaryai.salaryaiapi.organization;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -51,6 +54,15 @@ public java.util.List<Organization> getPendingOrganizations() {
     return organizationRepository.findByStatus("PENDING");
 }
 
+@Transactional(readOnly = true)
+public List<Organization> getOrganizationsByStatus(String status) {
+    if (!List.of("PENDING", "APPROVED", "REJECTED").contains(status)) {
+        throw new IllegalArgumentException("Invalid organization status.");
+    }
+
+    return organizationRepository.findByStatus(status);
+}
+
 @Transactional
 public Organization updateOrganizationStatus(Long id, String status) {
     Organization organization = organizationRepository.findById(id)
@@ -68,5 +80,28 @@ public Organization updateOrganizationStatus(Long id, String status) {
 
     organization.setStatus(status);
     return organizationRepository.save(organization);
+}
+
+@Transactional(readOnly = true)
+public Map<String, Long> getOrganizationStatusCounts() {
+    Map<String, Long> counts = new LinkedHashMap<>();
+
+    // Start each status at zero, including statuses with no organizations.
+    counts.put("PENDING", 0L);
+    counts.put("APPROVED", 0L);
+    counts.put("REJECTED", 0L);
+
+    // Get the actual grouped counts from PostgreSQL through the repository.
+    List<Map<String, Object>> results =
+            organizationRepository.countOrganizationsByStatus();
+
+    for (Map<String, Object> row : results) {
+        String status = (String) row.get("status");
+        long total = ((Number) row.get("total")).longValue();
+
+        counts.put(status, total);
+    }
+
+    return counts;
 }
 }

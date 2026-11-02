@@ -1,5 +1,6 @@
 
 import { useState } from 'react'
+import PlatformAdminDashboard from './pages/PlatformAdminDashboard'
 import PlatformAdminLogin from './pages/PlatformAdminLogin'
 import { Link, Route, Routes } from 'react-router-dom'
 import RegisterPage from './pages/RegisterPage'
@@ -292,9 +293,15 @@ function App() {
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+
       <Route
         path="/platform-admin/login"
         element={<PlatformAdminLogin />}
+      />
+
+      <Route
+        path="/platform-admin/dashboard"
+        element={<PlatformAdminDashboard />}
       />
     </Routes>
   )

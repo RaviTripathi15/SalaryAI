@@ -1,11 +1,42 @@
 
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { loginPlatformAdmin } from '../api/platformAdminApi'
 
 function PlatformAdminLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const navigate = useNavigate()
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    setError('')
+    setIsLoading(true)
+
+    try {
+      const admin = await loginPlatformAdmin(email.trim(), password)
+
+      if (admin.role !== 'PLATFORM_ADMIN') {
+        setError('This account is not authorized for platform administration.')
+        return
+      }
+
+      navigate('/platform-admin/dashboard')
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to sign in. Please try again.',
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <main className="admin-login-page">
@@ -24,7 +55,7 @@ function PlatformAdminLogin() {
           <p>Sign in to manage the SalaryAI platform.</p>
         </div>
 
-        <form onSubmit={(event) => event.preventDefault()}>
+        <form onSubmit={handleSubmit}>
           <label htmlFor="admin-email">Administrator email</label>
           <input
             id="admin-email"
@@ -58,8 +89,18 @@ function PlatformAdminLogin() {
             </button>
           </div>
 
-          <button className="sign-in-button" type="submit">
-            Sign in to Platform Admin
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button
+            className="sign-in-button"
+            type="submit"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Signing in...' : 'Sign in to Platform Admin'}
           </button>
         </form>
 
