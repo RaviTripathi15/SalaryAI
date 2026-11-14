@@ -75,6 +75,10 @@ public String getEmail() {
     return email;
 }
 
+public String getPasswordHash() {
+    return passwordHash;
+}
+
 public String getPhone() {
     return phone;
 }
