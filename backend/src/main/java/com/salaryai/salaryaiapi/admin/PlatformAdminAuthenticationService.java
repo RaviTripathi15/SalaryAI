@@ -1,5 +1,6 @@
 package com.salaryai.salaryaiapi.admin;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -10,11 +11,12 @@ public class PlatformAdminAuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
-    public PlatformAdminAuthenticationService(
-            AuthenticationManager authenticationManager) {
+public PlatformAdminAuthenticationService(
+        @Qualifier("platformAdminAuthenticationManager")
+        AuthenticationManager authenticationManager) {
 
-        this.authenticationManager = authenticationManager;
-    }
+    this.authenticationManager = authenticationManager;
+}
 
     public Authentication authenticate(
             String email,

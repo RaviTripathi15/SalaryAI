@@ -44,6 +44,10 @@ public String getEmail() {
     return email;
 }
 
+public void setPasswordHash(String passwordHash) {
+    this.passwordHash = passwordHash;
+}
+
 public String getPasswordHash() {
     return passwordHash;
 }

@@ -1,11 +1,15 @@
+
 package com.salaryai.salaryaiapi.config;
 
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import com.salaryai.salaryaiapi.admin.PlatformAdminUserDetailsService;
+import com.salaryai.salaryaiapi.organization.OrganizationAuthenticationProvider;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,6 +17,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -24,14 +32,14 @@ public class SecurityConfig {
             throws Exception {
 
         http
-           .csrf(csrf -> csrf
-    .csrfTokenRepository(
-        CookieCsrfTokenRepository.withHttpOnlyFalse()
-    )
-    .csrfTokenRequestHandler(
-        new CsrfTokenRequestAttributeHandler()
-    )
-)
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(
+                    CookieCsrfTokenRepository.withHttpOnlyFalse()
+                )
+                .csrfTokenRequestHandler(
+                    new CsrfTokenRequestAttributeHandler()
+                )
+            )
 
             .securityContext(context -> context
                 .securityContextRepository(securityContextRepository)
@@ -43,17 +51,21 @@ public class SecurityConfig {
             )
 
             .authorizeHttpRequests(auth -> auth
-    .requestMatchers(
-        "/api/v1/organizations/register",
-        "/api/v1/platform-admin/login",
-        "/api/v1/csrf"
-    ).permitAll()
+                .requestMatchers(
+                    "/api/v1/organizations/register",
+                    "/api/v1/organizations/login",
+                    "/api/v1/platform-admin/login",
+                    "/api/v1/csrf"
+                ).permitAll()
 
-    .requestMatchers("/api/v1/platform-admin/**")
-    .hasRole("PLATFORM_ADMIN")
+                .requestMatchers("/api/v1/platform-admin/**")
+                .hasRole("PLATFORM_ADMIN")
 
-    .anyRequest().authenticated()
-)
+                .requestMatchers("/api/v1/organizations/**")
+                .hasRole("ORGANIZATION_ADMIN")
+
+                .anyRequest().authenticated()
+            )
 
             .httpBasic(basic -> basic.disable())
             .formLogin(form -> form.disable());
@@ -67,11 +79,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration)
-            throws Exception {
+    public AuthenticationManager platformAdminAuthenticationManager(
+            PlatformAdminUserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
 
-        return configuration.getAuthenticationManager();
+        DaoAuthenticationProvider provider =
+                new DaoAuthenticationProvider(userDetailsService);
+
+        provider.setPasswordEncoder(passwordEncoder);
+
+        return new ProviderManager(List.of(provider));
+    }
+
+    @Bean
+    public AuthenticationManager organizationAuthenticationManager(
+            OrganizationAuthenticationProvider organizationProvider) {
+
+        return new ProviderManager(
+            List.of(organizationProvider)
+        );
     }
 
     @Bean
