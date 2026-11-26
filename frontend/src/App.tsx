@@ -1,8 +1,10 @@
 
 import { useState } from 'react'
+import OrganizationDashboard from './pages/OrganizationDashboard'
 import PlatformAdminDashboard from './pages/PlatformAdminDashboard'
 import PlatformAdminLogin from './pages/PlatformAdminLogin'
-import { Link, Route, Routes } from 'react-router-dom'
+import { Link, Route, Routes, useNavigate } from 'react-router-dom'
+import { loginOrganization } from './api/organizationApi'
 import RegisterPage from './pages/RegisterPage'
 import './App.css'
 
@@ -11,6 +13,48 @@ const workforcePhoto =
 
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const navigate = useNavigate()
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    setError('')
+    setIsLoading(true)
+
+    const formData = new FormData(event.currentTarget)
+    const organizationName = String(formData.get('organization') ?? '').trim()
+    const email = String(formData.get('email') ?? '').trim()
+    const password = String(formData.get('password') ?? '')
+
+    try {
+      const organization = await loginOrganization({
+        organizationName,
+        email,
+        password,
+      })
+
+      if (organization.role !== 'ORGANIZATION_ADMIN') {
+        setError('This account is not authorized for the organization workspace.')
+        return
+      }
+
+      navigate('/organization/dashboard', {
+        replace: true,
+        state: organization,
+      })
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to sign in. Please try again.',
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <main className="auth-page">
@@ -157,7 +201,7 @@ function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={(event) => event.preventDefault()}>
+          <form onSubmit={handleSubmit}>
             <label htmlFor="organization">
               Company or organization
             </label>
@@ -234,16 +278,28 @@ function LoginPage() {
               </button>
             </div>
 
+            {error && (
+              <p className="register-message register-error" role="alert">
+                {error}
+              </p>
+            )}
+
             <label className="remember-option">
               <input type="checkbox" name="remember" />
               <span>Remember me</span>
             </label>
 
-            <button className="sign-in-button" type="submit">
-              <span>Sign in</span>
-              <span className="sign-in-arrow" aria-hidden="true">
-                →
-              </span>
+            <button
+              className="sign-in-button"
+              type="submit"
+              disabled={isLoading}
+            >
+              <span>{isLoading ? 'Signing in...' : 'Sign in'}</span>
+              {!isLoading && (
+                <span className="sign-in-arrow" aria-hidden="true">
+                  →
+                </span>
+              )}
             </button>
           </form>
 
@@ -293,6 +349,11 @@ function App() {
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+
+      <Route
+        path="/organization/dashboard"
+        element={<OrganizationDashboard />}
+      />
 
       <Route
         path="/platform-admin/login"
