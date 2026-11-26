@@ -2,6 +2,7 @@
 package com.salaryai.salaryaiapi.organization;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +24,8 @@ public class OrganizationService {
 
     @Transactional(readOnly = true)
     public boolean emailAlreadyExists(String email) {
-        return organizationRepository.existsByEmail(email);
+        return organizationRepository.existsByEmailIgnoreCase(
+                normalizeEmail(email));
     }
 
     @Transactional
@@ -33,7 +35,10 @@ public class OrganizationService {
             String phone,
             String rawPassword) {
 
-        if (organizationRepository.existsByEmail(email)) {
+        String normalizedName = normalizeName(name);
+        String normalizedEmail = normalizeEmail(email);
+
+        if (organizationRepository.existsByEmailIgnoreCase(normalizedEmail)) {
             throw new IllegalArgumentException(
                     "An organization with this email already exists.");
         }
@@ -41,12 +46,20 @@ public class OrganizationService {
         String hashedPassword = passwordEncoder.encode(rawPassword);
 
         Organization organization = new Organization(
-                name,
-                email,
+                normalizedName,
+                normalizedEmail,
                 phone,
                 hashedPassword);
 
         return organizationRepository.save(organization);
+    }
+
+    private static String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private static String normalizeName(String name) {
+        return name == null ? null : name.trim();
     }
 
     @Transactional(readOnly = true)

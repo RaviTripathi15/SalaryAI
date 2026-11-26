@@ -14,7 +14,13 @@ public interface OrganizationRepository
 
     boolean existsByEmail(String email);
 
+    boolean existsByEmailIgnoreCase(String email);
+
     Optional<Organization> findByEmail(String email);
+
+    Optional<Organization> findByEmailIgnoreCase(String email);
+
+    boolean existsByIdAndStatus(Long id, String status);
 
     List<Organization> findByStatus(String status);
 
