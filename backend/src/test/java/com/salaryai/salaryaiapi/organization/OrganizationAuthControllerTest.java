@@ -33,6 +33,7 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -551,6 +552,7 @@ class OrganizationAuthControllerTest {
 // HttpSessionSecurityContextRepository, unlike the standalone controller tests
 // above.
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=none")
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 class OrganizationMeSecurityChainTest {
 
@@ -660,6 +662,7 @@ class OrganizationMeSecurityChainTest {
 }
 
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=none")
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 class OrganizationLogoutSecurityChainTest {
 
