@@ -101,8 +101,8 @@ function isLogoutResponse(value: unknown): value is LogoutResponse {
 }
 
 // Fetch a CSRF token before submitting a protected request.
-async function getCsrfToken(
-  errorMessage = 'Unable to initialize secure registration. Please try again.',
+export async function getCsrfToken(
+  errorMessage = 'Unable to initialize a secure request. Please try again.',
 ): Promise<CsrfResponse> {
   const response = await fetch(CSRF_URL, {
     method: 'GET',

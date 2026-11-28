@@ -144,6 +144,10 @@ public class Employee {
         return employeeCode;
     }
 
+    public void setEmployeeCode(String employeeCode) {
+        this.employeeCode = employeeCode;
+    }
+
     public String getFirstName() {
         return firstName;
     }
@@ -194,6 +198,10 @@ public class Employee {
 
     public LocalDate getJoiningDate() {
         return joiningDate;
+    }
+
+    public void setJoiningDate(LocalDate joiningDate) {
+        this.joiningDate = joiningDate;
     }
 
     public EmploymentStatus getEmploymentStatus() {

@@ -126,6 +126,11 @@ describe('OrganizationDashboard session verification', () => {
     expect(view.container.textContent).toContain('acme@example.com')
     expect(view.container.textContent).toContain('ORGANIZATION_ADMIN')
     expect(view.container.textContent).not.toContain('Sign in page')
+    expect(
+      view.container.querySelector(
+        'a[href="/organization/employees"]',
+      )?.textContent,
+    ).toContain('Employee management')
 
     view.unmount()
   })

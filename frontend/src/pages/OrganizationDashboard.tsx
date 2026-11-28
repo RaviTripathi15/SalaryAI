@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   getCurrentOrganization,
   logoutOrganization,
@@ -210,12 +210,14 @@ function OrganizationDashboard() {
           </div>
         </div>
 
-        <section className="admin-empty-state">
-          <h3>Your organization dashboard is coming soon.</h3>
-          <p>
-            Employee, attendance and payroll tools will appear here in a
-            future stage.
-          </p>
+        <section className="admin-employee-nav" aria-labelledby="workspace-tools-title">
+          <div>
+            <h3 id="workspace-tools-title">Workspace tools</h3>
+            <p>Manage employee records for your approved organization.</p>
+          </div>
+          <Link className="employee-primary-button" to="/organization/employees">
+            Employee management
+          </Link>
         </section>
       </section>
     </main>

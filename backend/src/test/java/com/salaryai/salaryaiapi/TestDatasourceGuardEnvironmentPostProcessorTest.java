@@ -5,6 +5,7 @@ import org.springframework.boot.EnvironmentPostProcessor;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.mock.env.MockEnvironment;
@@ -238,6 +239,70 @@ class TestDatasourceGuardEnvironmentPostProcessorTest {
     }
 
     @Test
+    void rejectsNonEnumerablePropertySourceThatCouldHideForbiddenHikariConfiguration() {
+        MockEnvironment environment = canonicalEnvironment();
+        String hiddenValue = "jdbc:postgresql://127.0.0.1:1/salaryai_opaque_probe";
+        environment.getPropertySources().addFirst(new PropertySource<>(
+                "opaque-datasource-source", new Object()) {
+            @Override
+            public Object getProperty(String name) {
+                return "spring.datasource.hikari.jdbc-url".equals(name) ? hiddenValue : null;
+            }
+        });
+
+        IllegalStateException failure = reject(environment);
+
+        assertThat(failure.getMessage())
+                .contains("uninspectable property source 'opaque-datasource-source'")
+                .doesNotContain(hiddenValue);
+    }
+
+    @Test
+    void rejectsPasswordDeclaredOutsideTheTestProfileResource() {
+        MockEnvironment environment = canonicalEnvironment();
+        environment.getPropertySources().addFirst(new MapPropertySource(
+                "inlined-test-password",
+                Map.of(PASSWORD_NAME,
+                        TestDatasourceGuardEnvironmentPostProcessor.PASSWORD_PLACEHOLDER)));
+
+        IllegalStateException failure = reject(environment);
+
+        assertThat(failure.getMessage())
+                .contains("datasource password must be supplied only by "
+                        + "SALARYAI_TEST_DB_PASSWORD")
+                .doesNotContain(TestDatasourceGuardEnvironmentPostProcessor.PASSWORD_PLACEHOLDER);
+    }
+
+    @Test
+    void rejectsLiteralPasswordInTheTestProfileResource() {
+        String secret = "do-not-disclose-" + UUID.randomUUID();
+        MockEnvironment environment = canonicalEnvironment();
+        environment.getPropertySources().remove(
+                TestDatasourceGuardEnvironmentPostProcessor.TEST_PROFILE_CONFIG_SOURCE_NAME);
+        environment.getPropertySources().addLast(new MapPropertySource(
+                TestDatasourceGuardEnvironmentPostProcessor.TEST_PROFILE_CONFIG_SOURCE_NAME,
+                Map.of(PASSWORD_NAME, secret)));
+
+        IllegalStateException failure = reject(environment);
+
+        assertThat(failure.getMessage()).doesNotContain(secret);
+    }
+
+    @Test
+    void rejectsDuplicatePasswordDeclarations() {
+        MockEnvironment environment = canonicalEnvironment();
+        environment.getPropertySources().addFirst(new MapPropertySource(
+                "duplicate-test-password",
+                Map.of(PASSWORD_NAME,
+                        TestDatasourceGuardEnvironmentPostProcessor.PASSWORD_PLACEHOLDER)));
+
+        IllegalStateException failure = reject(environment);
+
+        assertThat(failure.getMessage())
+                .contains("expected exactly one datasource password declaration");
+    }
+
+    @Test
     void passwordValueIsNeverRetrievedOrDisclosed() {
         String passwordValue = "do-not-disclose-" + UUID.randomUUID();
         CountingMockEnvironment environment = new CountingMockEnvironment();
@@ -275,6 +340,10 @@ class TestDatasourceGuardEnvironmentPostProcessorTest {
                 TestDatasourceGuardEnvironmentPostProcessor.EXPECTED_URL);
         environment.setProperty(USERNAME_NAME,
                 TestDatasourceGuardEnvironmentPostProcessor.EXPECTED_USERNAME);
+        environment.getPropertySources().addLast(new MapPropertySource(
+                TestDatasourceGuardEnvironmentPostProcessor.TEST_PROFILE_CONFIG_SOURCE_NAME,
+                Map.of(TestDatasourceGuardEnvironmentPostProcessor.PASSWORD_NAME,
+                        TestDatasourceGuardEnvironmentPostProcessor.PASSWORD_PLACEHOLDER)));
         return environment;
     }
 

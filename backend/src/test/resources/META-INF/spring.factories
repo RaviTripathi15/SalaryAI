@@ -1,2 +1,5 @@
 org.springframework.boot.EnvironmentPostProcessor=\
 com.salaryai.salaryaiapi.TestDatasourceGuardEnvironmentPostProcessor
+
+org.springframework.context.ApplicationContextInitializer=\
+com.salaryai.salaryaiapi.TestDatasourceGuardApplicationContextInitializer

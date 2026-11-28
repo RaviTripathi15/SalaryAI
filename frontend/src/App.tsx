@@ -6,6 +6,9 @@ import PlatformAdminLogin from './pages/PlatformAdminLogin'
 import { Link, Route, Routes, useNavigate } from 'react-router-dom'
 import { loginOrganization } from './api/organizationApi'
 import RegisterPage from './pages/RegisterPage'
+import EmployeeListPage from './pages/EmployeeListPage'
+import EmployeeFormPage from './pages/EmployeeFormPage'
+import EmployeeDetailsPage from './pages/EmployeeDetailsPage'
 import './App.css'
 
 const workforcePhoto =
@@ -353,6 +356,23 @@ function App() {
       <Route
         path="/organization/dashboard"
         element={<OrganizationDashboard />}
+      />
+
+      <Route
+        path="/organization/employees"
+        element={<EmployeeListPage />}
+      />
+      <Route
+        path="/organization/employees/new"
+        element={<EmployeeFormPage mode="create" />}
+      />
+      <Route
+        path="/organization/employees/:id"
+        element={<EmployeeDetailsPage />}
+      />
+      <Route
+        path="/organization/employees/:id/edit"
+        element={<EmployeeFormPage mode="edit" />}
       />
 
       <Route
